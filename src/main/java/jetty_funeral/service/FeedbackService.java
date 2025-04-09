@@ -1,5 +1,6 @@
 package jetty_funeral.service;
 
+import jetty_funeral.exception.ValidationException;
 import jetty_funeral.model.Feedback;
 import jetty_funeral.repository.FunerariaRepository;
 import jetty_funeral.repository.UserRepository;
@@ -16,19 +17,19 @@ public class FeedbackService {
 
 	public void validarFeedback(Feedback feedback) {
 		if (feedback.getAvaliacao() == null || feedback.getAvaliacao().isBlank()) {
-			throw new IllegalArgumentException("Avaliação é obrigatória.");
+			throw new ValidationException("Avaliação é obrigatória.");
 		}
 
 		if (feedback.getComentario() == null || feedback.getComentario().isBlank()) {
-			throw new IllegalArgumentException("Comentário é obrigatório.");
+			throw new ValidationException("Comentário é obrigatório.");
 		}
 
 		if (userRepository.getById(feedback.getIdUser()) == null) {
-			throw new IllegalArgumentException("Usuário não existe.");
+			throw new ValidationException("Usuário não existe.");
 		}
 
 		if (funerariaRepository.getById(feedback.getIdFuneraria()) == null) {
-			throw new IllegalArgumentException("Funerária não existe.");
+			throw new ValidationException("Funerária não existe.");
 		}
 	}
 }

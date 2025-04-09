@@ -9,6 +9,8 @@ import jetty_funeral.controller.FunerariaServlet;
 import jetty_funeral.controller.UserServlet;
 import jetty_funeral.repository.FunerariaRepository;
 import jetty_funeral.repository.UserRepository;
+import jetty_funeral.service.FunerariaService;
+import jetty_funeral.service.UserService;
 
 public class Main {
 	public static void main(String[] args) throws Exception {
@@ -22,11 +24,13 @@ public class Main {
 
 		// Criando repositórios compartilhados
 		UserRepository userRepository = new UserRepository();
+		UserService userService = new UserService(userRepository);
 		FunerariaRepository funerariaRepository = new FunerariaRepository();
+		FunerariaService funerariaService = new FunerariaService(funerariaRepository);
 
 		// Registrando servlets e injetando dependências
-		context.addServlet(new ServletHolder(new UserServlet(userRepository)), "/user");
-		context.addServlet(new ServletHolder(new FunerariaServlet(funerariaRepository)), "/funeraria");
+		context.addServlet(new ServletHolder(new UserServlet(userRepository, userService)), "/user");
+		context.addServlet(new ServletHolder(new FunerariaServlet(funerariaRepository, funerariaService)), "/funeraria");
 		context.addServlet(new ServletHolder(new FeedbackServlet(userRepository, funerariaRepository)), "/feedback");
 
 		// Iniciando o servidor

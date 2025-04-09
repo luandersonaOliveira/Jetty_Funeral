@@ -1,3 +1,13 @@
+jetty_funeral\repository\UserRepository.class
+jetty_funeral\model\Funeraria.class
+jetty_funeral\controller\UserServlet.class
+jetty_funeral\service\FunerariaService.class
+jetty_funeral\service\UserService.class
+jetty_funeral\controller\FeedbackServlet.class
+jetty_funeral\repository\FunerariaRepository.class
 jetty_funeral\model\User.class
-jetty_funeral\model\UserServlet.class
-jetty_funeral\JettyServer.class
+jetty_funeral\controller\FunerariaServlet.class
+jetty_funeral\service\FeedbackService.class
+jetty_funeral\repository\FeedbackRepository.class
+jetty_funeral\model\Feedback.class
+jetty_funeral\Main.class

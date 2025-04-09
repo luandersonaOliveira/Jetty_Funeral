@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jetty_funeral.exception.ValidationException;
 import jetty_funeral.model.Feedback;
 import jetty_funeral.repository.FeedbackRepository;
 import jetty_funeral.repository.FunerariaRepository;
@@ -30,44 +31,59 @@ public class FeedbackServlet extends HttpServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		resp.setContentType("application/json");
-
 		String userIdParam = req.getParameter("userId");
 		String funerariaIdParam = req.getParameter("funerariaId");
 
+		resp.setContentType("application/json");
+
 		if (userIdParam != null) {
 			int userId = Integer.parseInt(userIdParam);
+
+			if (userRepository.getById(userId) == null) {
+				resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+				resp.getWriter().write("{\"error\": \"Usuário não encontrado\"}");
+				return;
+			}
+
+			resp.setStatus(HttpServletResponse.SC_OK);
 			resp.getWriter().write(objectMapper.writeValueAsString(feedbackRepository.getByUserId(userId)));
-		} else if (funerariaIdParam != null) {
-			int funerariaId = Integer.parseInt(funerariaIdParam);
-			resp.getWriter().write(objectMapper.writeValueAsString(feedbackRepository.getByFunerariaId(funerariaId)));
-		} else {
-			resp.getWriter().write(objectMapper.writeValueAsString(feedbackRepository.getAll()));
+			return;
 		}
+
+		if (funerariaIdParam != null) {
+			int funerariaId = Integer.parseInt(funerariaIdParam);
+
+			if (funerariaRepository.getById(funerariaId) == null) {
+				resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+				resp.getWriter().write("{\"error\": \"Funerária não encontrada\"}");
+				return;
+			}
+
+			resp.setStatus(HttpServletResponse.SC_OK);
+			resp.getWriter().write(objectMapper.writeValueAsString(feedbackRepository.getByFunerariaId(funerariaId)));
+			return;
+		}
+
+		// Se nenhum parâmetro foi informado, retorna todos
+		resp.setStatus(HttpServletResponse.SC_OK);
+		resp.getWriter().write(objectMapper.writeValueAsString(feedbackRepository.getAll()));
 	}
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		Feedback feedback = objectMapper.readValue(req.getReader(), Feedback.class);
+		try {
+			Feedback feedback = objectMapper.readValue(req.getReader(), Feedback.class);
+			feedbackService.validarFeedback(feedback);
+			feedback.setId(idCounter++);
+			feedbackRepository.add(feedback);
 
-		if (!userRepository.existsById(feedback.getIdUser())) {
+			resp.setContentType("application/json");
+			resp.setStatus(HttpServletResponse.SC_CREATED);
+			resp.getWriter().write(objectMapper.writeValueAsString(feedback));
+		} catch (ValidationException e) {
+			resp.setContentType("application/json");
 			resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			resp.getWriter().write("{ \"error\": \"Usuário não encontrado\" }");
-			return;
+			resp.getWriter().write("{\"error\": \"" + e.getMessage() + "\"}");
 		}
-
-		if (!funerariaRepository.existsById(feedback.getIdFuneraria())) {
-			resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			resp.getWriter().write("{ \"error\": \"Funerária não encontrada\" }");
-			return;
-		}
-
-		feedbackService.validarFeedback(feedback);
-		feedback.setId(idCounter++);
-		feedbackRepository.add(feedback);
-
-		resp.setStatus(HttpServletResponse.SC_CREATED);
-		resp.setContentType("application/json");
-		resp.getWriter().write(objectMapper.writeValueAsString(feedback));
 	}
 }
