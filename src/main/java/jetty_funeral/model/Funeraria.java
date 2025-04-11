@@ -1,6 +1,7 @@
 package jetty_funeral.model;
 
 public class Funeraria {
+	
 	private int id;
 	private String companyName;
 	private String description;

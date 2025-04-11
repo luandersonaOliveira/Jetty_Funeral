@@ -28,5 +28,7 @@ public class FunerariaService {
 		if (nomeJaExiste) {
 			throw new ValidationException("Já existe uma funerária com esse nome.");
 		}
+
+		funerariaRepository.add(funeraria);
 	}
 }

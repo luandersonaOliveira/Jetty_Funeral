@@ -7,6 +7,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import jetty_funeral.controller.FeedbackServlet;
 import jetty_funeral.controller.FunerariaServlet;
 import jetty_funeral.controller.UserServlet;
+import jetty_funeral.repository.FeedbackRepository;
 import jetty_funeral.repository.FunerariaRepository;
 import jetty_funeral.repository.UserRepository;
 import jetty_funeral.service.FunerariaService;
@@ -25,13 +26,19 @@ public class Main {
 		// Criando repositórios compartilhados
 		UserRepository userRepository = new UserRepository();
 		UserService userService = new UserService(userRepository);
+
 		FunerariaRepository funerariaRepository = new FunerariaRepository();
 		FunerariaService funerariaService = new FunerariaService(funerariaRepository);
 
+		FeedbackRepository feedbackRepository = new FeedbackRepository();
+
 		// Registrando servlets e injetando dependências
 		context.addServlet(new ServletHolder(new UserServlet(userRepository, userService)), "/user");
-		context.addServlet(new ServletHolder(new FunerariaServlet(funerariaRepository, funerariaService)), "/funeraria");
-		context.addServlet(new ServletHolder(new FeedbackServlet(userRepository, funerariaRepository)), "/feedback");
+		context.addServlet(new ServletHolder(new FunerariaServlet(funerariaRepository, funerariaService)),
+				"/funeraria");
+		context.addServlet(
+				new ServletHolder(new FeedbackServlet(feedbackRepository, userRepository, funerariaRepository)),
+				"/feedback");
 
 		// Iniciando o servidor
 		server.start();

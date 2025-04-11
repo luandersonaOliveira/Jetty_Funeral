@@ -17,7 +17,6 @@ public class FunerariaServlet extends HttpServlet {
 	private FunerariaRepository funerariaRepository = new FunerariaRepository();
 	private FunerariaService funerariaService = new FunerariaService(funerariaRepository);
 	private final ObjectMapper objectMapper = new ObjectMapper();
-	private int idCounter = 1;
 
 	public FunerariaServlet(FunerariaRepository funerariaRepository, FunerariaService funerariaService) {
 		this.funerariaRepository = funerariaRepository;
@@ -48,8 +47,6 @@ public class FunerariaServlet extends HttpServlet {
 		try {
 			Funeraria funeraria = objectMapper.readValue(req.getReader(), Funeraria.class);
 			funerariaService.validarFuneraria(funeraria);
-			funeraria.setId(idCounter++);
-			funerariaRepository.add(funeraria);
 
 			resp.setContentType("application/json");
 			resp.setStatus(HttpServletResponse.SC_CREATED);

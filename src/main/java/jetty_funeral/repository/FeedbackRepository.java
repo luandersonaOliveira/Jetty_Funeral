@@ -7,8 +7,10 @@ import jetty_funeral.model.Feedback;
 
 public class FeedbackRepository {
 	private final List<Feedback> feedbacks = new ArrayList<>();
+	private int idCounter = 1;
 
 	public void add(Feedback feedback) {
+		feedback.setId(idCounter++);
 		feedbacks.add(feedback);
 	}
 

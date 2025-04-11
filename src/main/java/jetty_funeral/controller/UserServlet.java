@@ -17,12 +17,11 @@ public class UserServlet extends HttpServlet {
 	private UserRepository userRepository = new UserRepository();
 	private UserService userService = new UserService(userRepository);
 	private final ObjectMapper objectMapper = new ObjectMapper();
-	private int idCounter = 1;
 
 	public UserServlet(UserRepository userRepository, UserService userService) {
-        this.userRepository = userRepository;
-        this.userService = userService;
-    }
+		this.userRepository = userRepository;
+		this.userService = userService;
+	}
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -55,8 +54,6 @@ public class UserServlet extends HttpServlet {
 		try {
 			User user = objectMapper.readValue(req.getReader(), User.class);
 			userService.validarUsuario(user);
-			user.setId(idCounter++);
-			userRepository.addUser(user);
 
 			resp.setContentType("application/json");
 			resp.setStatus(HttpServletResponse.SC_CREATED);

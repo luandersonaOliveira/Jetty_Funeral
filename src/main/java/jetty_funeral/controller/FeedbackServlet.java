@@ -1,6 +1,7 @@
 package jetty_funeral.controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -16,17 +17,18 @@ import jetty_funeral.service.FeedbackService;
 
 public class FeedbackServlet extends HttpServlet {
 
-	private final FeedbackRepository feedbackRepository = new FeedbackRepository();
+	private final FeedbackRepository feedbackRepository;
 	private final FeedbackService feedbackService;
-	private FunerariaRepository funerariaRepository = new FunerariaRepository();
-	private UserRepository userRepository = new UserRepository();
+	private final FunerariaRepository funerariaRepository;
+	private final UserRepository userRepository;
 	private final ObjectMapper objectMapper = new ObjectMapper();
-	private int idCounter = 1;
 
-	public FeedbackServlet(UserRepository userRepo, FunerariaRepository funerariaRepo) {
+	public FeedbackServlet(FeedbackRepository feedbackRepo, UserRepository userRepo,
+			FunerariaRepository funerariaRepo) {
+		this.feedbackRepository = feedbackRepo;
 		this.userRepository = userRepo;
 		this.funerariaRepository = funerariaRepo;
-		this.feedbackService = new FeedbackService(userRepo, funerariaRepo);
+		this.feedbackService = new FeedbackService(feedbackRepo, userRepo, funerariaRepo);
 	}
 
 	@Override
@@ -45,8 +47,15 @@ public class FeedbackServlet extends HttpServlet {
 				return;
 			}
 
+			List<Feedback> feedbacks = feedbackRepository.getByUserId(userId);
+			if (feedbacks.isEmpty()) {
+				resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+				resp.getWriter().write("{\"error\": \"Nenhum feedback encontrado para este usuário.\"}");
+				return;
+			}
+
 			resp.setStatus(HttpServletResponse.SC_OK);
-			resp.getWriter().write(objectMapper.writeValueAsString(feedbackRepository.getByUserId(userId)));
+			resp.getWriter().write(objectMapper.writeValueAsString(feedbacks));
 			return;
 		}
 
@@ -59,14 +68,29 @@ public class FeedbackServlet extends HttpServlet {
 				return;
 			}
 
+			List<Feedback> feedbacks = feedbackRepository.getByFunerariaId(funerariaId);
+			if (feedbacks.isEmpty()) {
+				resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+				resp.getWriter().write("{\"error\": \"Nenhum feedback encontrado para esta funerária.\"}");
+				return;
+			}
+
 			resp.setStatus(HttpServletResponse.SC_OK);
-			resp.getWriter().write(objectMapper.writeValueAsString(feedbackRepository.getByFunerariaId(funerariaId)));
+			resp.getWriter().write(objectMapper.writeValueAsString(feedbacks));
 			return;
 		}
 
-		// Se nenhum parâmetro foi informado, retorna todos
+		// Nenhum parâmetro? Lista todos os feedbacks
+
+		List<Feedback> todos = feedbackRepository.getAll();
+		if (todos.isEmpty()) {
+			resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			resp.getWriter().write("{\"error\": \"Nenhum feedback cadastrado ainda.\"}");
+			return;
+		}
+
 		resp.setStatus(HttpServletResponse.SC_OK);
-		resp.getWriter().write(objectMapper.writeValueAsString(feedbackRepository.getAll()));
+		resp.getWriter().write(objectMapper.writeValueAsString(todos));
 	}
 
 	@Override
@@ -74,8 +98,6 @@ public class FeedbackServlet extends HttpServlet {
 		try {
 			Feedback feedback = objectMapper.readValue(req.getReader(), Feedback.class);
 			feedbackService.validarFeedback(feedback);
-			feedback.setId(idCounter++);
-			feedbackRepository.add(feedback);
 
 			resp.setContentType("application/json");
 			resp.setStatus(HttpServletResponse.SC_CREATED);

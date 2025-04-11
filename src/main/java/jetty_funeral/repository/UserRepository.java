@@ -7,8 +7,10 @@ import jetty_funeral.model.User;
 
 public class UserRepository {
 	private final List<User> users = new ArrayList<>();
+	private int idCounter = 1;
 
 	public void addUser(User user) {
+		user.setId(idCounter++);
 		users.add(user);
 	}
 

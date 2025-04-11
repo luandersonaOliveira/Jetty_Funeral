@@ -1,14 +1,16 @@
 package jetty_funeral.repository;
 
-import jetty_funeral.model.Funeraria;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import jetty_funeral.model.Funeraria;
+
 public class FunerariaRepository {
 	private final List<Funeraria> funerarias = new ArrayList<>();
+	private int idCounter = 1;
 
 	public void add(Funeraria funeraria) {
+		funeraria.setId(idCounter++);
 		funerarias.add(funeraria);
 	}
 

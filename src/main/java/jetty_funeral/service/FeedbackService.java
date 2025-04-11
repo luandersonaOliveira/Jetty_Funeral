@@ -2,15 +2,19 @@ package jetty_funeral.service;
 
 import jetty_funeral.exception.ValidationException;
 import jetty_funeral.model.Feedback;
+import jetty_funeral.repository.FeedbackRepository;
 import jetty_funeral.repository.FunerariaRepository;
 import jetty_funeral.repository.UserRepository;
 
 public class FeedbackService {
 
+	private final FeedbackRepository feedbackRepository;
 	private final UserRepository userRepository;
 	private final FunerariaRepository funerariaRepository;
 
-	public FeedbackService(UserRepository userRepository, FunerariaRepository funerariaRepository) {
+	public FeedbackService(FeedbackRepository feedbackRepository, UserRepository userRepository,
+			FunerariaRepository funerariaRepository) {
+		this.feedbackRepository = feedbackRepository;
 		this.userRepository = userRepository;
 		this.funerariaRepository = funerariaRepository;
 	}
@@ -31,5 +35,7 @@ public class FeedbackService {
 		if (funerariaRepository.getById(feedback.getIdFuneraria()) == null) {
 			throw new ValidationException("Funerária não existe.");
 		}
+
+		feedbackRepository.add(feedback);
 	}
 }

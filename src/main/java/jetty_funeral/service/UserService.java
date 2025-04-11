@@ -32,5 +32,7 @@ public class UserService {
 		if (usernameJaExiste) {
 			throw new ValidationException("Já existe um usuário com esse username.");
 		}
+
+		userRepository.addUser(user);
 	}
 }
